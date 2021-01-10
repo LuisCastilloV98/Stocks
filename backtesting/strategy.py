@@ -1,8 +1,9 @@
 import backtrader as bt
 
+
 class MyStrategy(bt.Strategy):
     def next(self):
-        pass #Do something
+        pass  # Do something
 
 
 class PrintClose(bt.Strategy):
@@ -38,7 +39,7 @@ class MAcrossover(bt.Strategy):
                                                           period=self.params.pslow)
         self.fast_sma = bt.indicators.MovingAverageSimple(self.datas[0])
 
-        #Indicators
+        # Indicators
         self.crossover = bt.indicators.CrossOver(self.fast_sma, self.slow_sma)
 
     def notify_order(self, order):
@@ -61,7 +62,7 @@ class MAcrossover(bt.Strategy):
         # Reset orders
         self.order = None
 
-        period=self.params.pfast
+        period = self.params.pfast
 
     def next(self):
         # Check for open orders

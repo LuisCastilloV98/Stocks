@@ -1,11 +1,14 @@
+
 import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 # nltk.download('vader_lexicon')
 from sentiment_analysis.finviz import get_df_history_finviz
 from sentiment_analysis.google_news import get_df_history_google_news
 from sentiment_analysis.yahoo_news import get_df_history_yahoo_news
-
 
 def analyzer_news_company(ticker, initial_date, final_date):
     df = get_df_history_finviz(ticker, initial_date, final_date)

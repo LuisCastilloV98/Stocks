@@ -1,17 +1,23 @@
+from backtesting.strategy import *
+import backtrader as bt
+from stocks_data.techindicators import get_technical_indicators
+from stocks_data.losers import get_losers_stocks
+from stocks_data.gainers import get_gainers_stocks
+from stocks_data.actives import get_most_actives_stocks
+from history_analysis.history import get_history_company
+from history_analysis.analysis import analysis_company
 import datetime
 
-from history_analysis.analysis import analysis_company
-from history_analysis.history import get_history_company
-from stocks_data.actives import get_most_actives_stocks
-from stocks_data.gainers import get_gainers_stocks
-from stocks_data.losers import get_losers_stocks
-from stocks_data.techindicators import get_technical_indicators
 import yfinance as yf
 import numpy as np
 import pandas as pd
 from datetime import datetime, date, timedelta
 from sklearn import linear_model
 import matplotlib.pyplot as plt
+
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.absolute()) + "/../")
 #
 # if __name__ == '__main__':
 #     initial_date = datetime.date(2020, 12, 28 - 5)
@@ -34,9 +40,6 @@ import matplotlib.pyplot as plt
 #     # print(gainers)
 #     # get_technical_indicators(tickers, '30min')
 
-import backtrader as bt
-from backtesting.strategy import *
-
 
 final_date = date.today()
 initial_date = final_date - timedelta(days=7)
@@ -44,10 +47,10 @@ initial_date = final_date - timedelta(days=7)
 ticker = 'SRPT'
 internal = "1m"
 
-#Instantiate Cerebro engine
+# Instantiate Cerebro engine
 cerebro = bt.Cerebro()
 
-#Add strategy to Cerebro
+# Add strategy to Cerebro
 cerebro.addstrategy(MAcrossover)
 
 stock = yf.Ticker(ticker)
