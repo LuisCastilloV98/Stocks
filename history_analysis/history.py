@@ -13,6 +13,7 @@ def get_history_company(ticker, can_days, internal):
 
     # get historical market data
     data = stock.history(period="{}d".format(can_days), interval=internal)
+    stock.get_recommendations()
 
     # linear regression
     x = (data.index - data.index[0]).days.values.reshape(-1, 1)
