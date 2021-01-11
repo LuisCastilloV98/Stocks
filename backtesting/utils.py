@@ -1,11 +1,17 @@
-import datetime
+from datetime import datetime
+import pandas as pd
+import yfinance as yf
+import backtrader as bt
+from pytrends.request import TrendReq
+from sentiment_analysis.analyzer import analyzer_news_company
 
-def fit_sentiment_days(sentiment_analysis, data):
-    data['datatime'] = data.index
-    list_data = data.values.tolist()
+
+def fit_sentiment_days(data_frame_sentiment_news, data_frame_history):
+    data_frame_history['datatime'] = data_frame_history.index
+    list_data = data_frame_history.values.tolist()
     list_data = sorted(list_data, key=lambda a: a[-1])
 
-    list_sentiment_analysis = sentiment_analysis.values.tolist()
+    list_sentiment_analysis = data_frame_sentiment_news.values.tolist()
     list_sentiment_analysis = sorted(
         list_sentiment_analysis, key=lambda a: a[1])
 
@@ -30,7 +36,7 @@ def fit_sentiment_days(sentiment_analysis, data):
                     list_sentiment_analysis[actual_pos_sentiment][-1])
             actual_pos_sentiment += 1
 
-            while list_sentiment_analysis[actual_pos_sentiment+1][1] < i[-1]:
+            while list_sentiment_analysis[actual_pos_sentiment + 1][1] < i[-1]:
                 temp_list.append(
                     list_sentiment_analysis[actual_pos_sentiment][-1])
                 actual_pos_sentiment += 1
@@ -41,3 +47,62 @@ def fit_sentiment_days(sentiment_analysis, data):
                       columns=['DateTime', 'Average_news'])
 
     return df
+
+
+def add_data_to_cerebro(cerebro, ticker, internal, initial_date, final_date):
+    # Add history data to cerebro
+    stock_yf = yf.Ticker(ticker)
+    data_frame_history = stock_yf.history(
+        start=initial_date.strftime("%Y-%m-%d"),
+        end=final_date.strftime("%Y-%m-%d"),
+        interval=internal)
+    data_history_f = bt.feeds.PandasData(dataname=data_frame_history)
+
+    cerebro.adddata(data_history_f)
+
+    # Add data from google trends
+    py_trend = TrendReq()
+    #kw_list = ["amazon"]
+    kw_list = [ticker]
+    py_trend.build_payload(kw_list, cat=7, timeframe='now 7-d',
+                           geo='', gprop='news')
+    data_trends = py_trend.interest_over_time()
+    data_trends['Date'] = data_trends.index
+    del data_trends["isPartial"]
+    var = data_trends[data_trends.columns[0]]
+    del data_trends[data_trends.columns[0]]
+    data_trends['Company'] = var
+
+    data_trends_f = bt.feeds.PandasData(
+        dataname=data_trends,
+        fromdate=initial_date,
+        todate=final_date,
+        datetime=0,
+        high=-1,
+        low=-1,
+        open=-1,
+        close=1,
+        openinterest=-1,
+        timeframe=bt.TimeFrame.Days)
+
+    cerebro.adddata(data_trends_f)
+
+    # Add data from sentiment news
+    data_frame_sentiment_news = analyzer_news_company(ticker, initial_date, final_date)
+    data_news = fit_sentiment_days(data_frame_sentiment_news, data_frame_history)
+    data_news_f = bt.feeds.PandasData(
+        dataname=data_news,
+        fromdate=initial_date,
+        todate=final_date,
+        datetime=0,
+        high=-1,
+        low=-1,
+        open=-1,
+        close=1,
+        openinterest=-1)
+
+    cerebro.adddata(data_news_f)
+
+    #Return cerebro
+
+    return cerebro

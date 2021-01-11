@@ -1,12 +1,10 @@
 import yfinance as yf
-import numpy as np
-import pandas as pd
-import datetime
 from sklearn import linear_model
 
 
-def get_history_company(ticker, can_days, internal):
-    stock = yf.Ticker("MNSO")
+# Need to repare and complete code
+def get_stock_linear_regression(ticker, can_days, internal):
+    stock = yf.Ticker(ticker)
 
     # get stock info
     # print(stock.info)
