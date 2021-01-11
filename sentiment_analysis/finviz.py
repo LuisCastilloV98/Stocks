@@ -25,15 +25,16 @@ def get_df_history_finviz(ticker, initial_date, final_date):
         date_data = row.td.text.split(' ')
 
         if len(date_data) == 1:
-            time = date_data[0]
+            time = date+" "+date_data[0]
         else:
             date = date_data[0]
-            time = date_data[1]
+            time = date+" "+date_data[1]
 
         parsed_data.append([ticker, date, time, title])
 
     df = pd.DataFrame(parsed_data, columns=['ticker', 'date', 'time', 'title'])
 
+    df['time'] = pd.to_datetime(df.time)
     df['date'] = pd.to_datetime(df.date).dt.date
 
     df = df[(df.date >= initial_date) & (final_date >= df.date)]
